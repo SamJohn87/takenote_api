@@ -43,15 +43,7 @@ const goalSchema = new Schema({
 });
 
 const userSchema = new Schema({
-    googleId: String,
-    firstname: {
-        type: String,
-        default: ''
-    },
-    lastname: {
-        type: String,
-        default: ''
-    },
+    //googleId: String,
     admin: {
         type: Boolean,
         default: false
