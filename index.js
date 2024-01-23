@@ -6,6 +6,7 @@ const session = require('express-session');
 
 //Routers
 const userRouter = require('./routes/userRouter');
+const noteRouter = require('./routes/noteRouter');
 
 //MongoDB connection
 const mongoose = require('mongoose');
@@ -20,5 +21,6 @@ app.use(express.json());
 app.use(passport.initialize());
 
 app.use('/user', userRouter);
+app.use('/notes', noteRouter);
 
 exports.myExpressApp = app;

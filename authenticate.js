@@ -27,15 +27,19 @@ exports.jwtPassport = passport.use(
         opts, //object configuration options
         (jwt_payload, done) => { //verify callback function
             console.log('JWT payload', jwt_payload);
-            User.findOne({ _id: jwt_payload._id }, (err, user) => {
-                if (err) {
+            User.findOne({ _id: jwt_payload._id })
+                .then(user => {
+                    if (user) {
+                        // Check if user object is valid
+                        return done(null, user);
+                    } else {
+                        return done(null, false);
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
                     return done(err, false);
-                } else if (user) {
-                    return done(null, user)
-                } else {
-                    return done(null, false);
-                }
-            });
+                });
         }
     )
 );
