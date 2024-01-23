@@ -5,6 +5,18 @@ const authenticate = require('../authenticate');
 
 const userRouter = express.Router();
 
+userRouter.get('/auth/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+
+userRouter.get('/auth/google/callback',
+    passport.authenticate('google', { failureRedirect: '/user/auth/google', session: false }),
+    function (req, res) {
+        // Successful authentication, redirect home.
+        const token = authenticate.getToken({ _id: req.user._id });
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'application/json');
+        res.json({ success: true, token: token, status: 'You are successfully logged in!' });
+    });
+
 userRouter.post('/signup', (req, res) => {
     User.register(
         new User({ username: req.body.username }),
@@ -39,6 +51,6 @@ userRouter.post('/login', passport.authenticate('local', { session: false }), (r
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.json({ success: true, token: token, status: 'You are successfully logged in!' }); //add token in response to client
-  });
+});
 
 module.exports = userRouter;

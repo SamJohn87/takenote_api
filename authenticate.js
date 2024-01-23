@@ -4,6 +4,7 @@ const User = require('./models/user'); //user schema has access to the passport 
 const JwtStrategy = require('passport-jwt').Strategy;
 const ExtractJwt = require('passport-jwt').ExtractJwt; //extract JW Token from request object
 const jwt = require('jsonwebtoken'); //node module used to create, sign and verify tokens
+const GoogleStrategy = require('passport-google-oauth20').Strategy;
 
 const config = require('./config.js');
 
@@ -26,7 +27,6 @@ exports.jwtPassport = passport.use(
     new JwtStrategy(
         opts, //object configuration options
         (jwt_payload, done) => { //verify callback function
-            console.log('JWT payload', jwt_payload);
             User.findOne({ _id: jwt_payload._id })
                 .then(user => {
                     if (user) {
@@ -55,3 +55,31 @@ exports.verifyAdmin = (req, res, next) => {
         return next(err);
     }
 };
+
+passport.use(new GoogleStrategy({
+    clientID: config.google.GOOGLE_CLIENT_ID,
+    clientSecret: config.google.GOOGLE_CLIENT_SECRET,
+    callbackURL: 'http://localhost:8080/user/auth/google/callback'
+},
+    function (accessToken, refreshToken, profile, cb) {
+        User.findOne({ googleId: profile.id })
+            .then(user => {
+                if (user) {
+                    return cb(null, user);
+                } else {
+                    user = new User({ username: profile.emails[0].value });
+                    user.googleId = profile.id;
+                    user.firstname = profile.name.givenName;
+                    user.lastname = profile.name.familyName;
+                    user.save()
+                        .then(user => {
+                            if (user) {
+                                return cb(null, user);
+                            }
+                        })
+                        .catch(err => cb(err, false));
+                }
+            })
+            .catch(err => cb(err, false));
+    }
+));
