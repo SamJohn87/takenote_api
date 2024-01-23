@@ -1,14 +1,10 @@
 const express = require('express');
 const User = require('../models/user');
 const authenticate = require('../authenticate');
-const cors = require('./cors');
 
 const noteRouter = express.Router();
 
 noteRouter.route('/')
-    .options(cors.corsWithOptions, (req, res) => {
-        res.sendStatus(200)
-    })
     .get(authenticate.verifyUser, (req, res, next) => { //get all user's notes - user needs to be authenticated
         User.findById(req.user._id)
             .then(user => {
@@ -38,7 +34,7 @@ noteRouter.route('/')
             })
             .catch(err => next(err));
     })
-    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
+    .put(authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end('PUT operation not supported on /notes');
     })
@@ -64,9 +60,6 @@ noteRouter.route('/')
     });
 
 noteRouter.route('/:noteId')
-    .options(cors.corsWithOptions, (req, res) => {
-        res.sendStatus(200)
-    })
     .get(authenticate.verifyUser, (req, res, next) => { //get specific note - user must be authenticated
         User.findById(req.user._id)
             .then(user => {

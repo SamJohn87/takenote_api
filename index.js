@@ -2,11 +2,11 @@ const express = require('express');
 const config = require('./config');
 const logger = require('morgan');
 const passport = require('passport');
-const session = require('express-session');
 
 //Routers
 const userRouter = require('./routes/userRouter');
 const noteRouter = require('./routes/noteRouter');
+const goalRouter = require('./routes/goalRouter');
 
 //MongoDB connection
 const mongoose = require('mongoose');
@@ -22,5 +22,6 @@ app.use(passport.initialize());
 
 app.use('/user', userRouter);
 app.use('/notes', noteRouter);
+app.use('/goals', goalRouter);
 
 exports.myExpressApp = app;
