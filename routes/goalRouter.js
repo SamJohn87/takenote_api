@@ -1,12 +1,16 @@
 const express = require('express');
 const User = require('../models/user');
+const cors = require('./cors');
 const authenticate = require('../authenticate');
 const mongoose = require('mongoose');
 
 const goalRouter = express.Router();
 
 goalRouter.route('/')
-    .get(authenticate.verifyUser, (req, res, next) => { //get all user's goals - user needs to be authenticated
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200);
+    })
+    .get(cors.cors, authenticate.verifyUser, (req, res, next) => { //get all user's goals - user needs to be authenticated
         User.findById(req.user._id)
             .then(user => {
                 res.statusCode = 200;
@@ -15,7 +19,7 @@ goalRouter.route('/')
             })
             .catch(err => next(err));
     })
-    .post(authenticate.verifyUser, (req, res, next) => { //add goal - user needs to be authenticated
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //add goal - user needs to be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user) {
@@ -42,11 +46,11 @@ goalRouter.route('/')
             })
             .catch(err => next(err));
     })
-    .put(authenticate.verifyUser, (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end('PUT operation not supported on /goals');
     })
-    .delete(authenticate.verifyUser, (req, res, next) => { //delete all goals - user must be authenticated
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //delete all goals - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user) {
@@ -68,7 +72,10 @@ goalRouter.route('/')
     });
 
 goalRouter.route('/:goalId')
-    .get(authenticate.verifyUser, (req, res, next) => { //get specific goal - user must be authenticated
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200);
+    })
+    .get(cors.cors, authenticate.verifyUser, (req, res, next) => { //get specific goal - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.goals.id(req.params.goalId)) {
@@ -87,11 +94,11 @@ goalRouter.route('/:goalId')
             })
             .catch(err => next(err));
     })
-    .post(authenticate.verifyUser, (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end(`POST operation not supported on /goals/${req.params.goalId}`);
     })
-    .put(authenticate.verifyUser, (req, res, next) => { //update goal - user must be authenticated
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //update goal - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.goals.id(req.params.goalId)) {
@@ -121,7 +128,7 @@ goalRouter.route('/:goalId')
             })
             .catch(err => next(err));
     })
-    .delete(authenticate.verifyUser, (req, res, next) => { //delete goal - user must be authenticated
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //delete goal - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.goals.id(req.params.goalId)) {
