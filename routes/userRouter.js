@@ -2,6 +2,8 @@ const express = require('express');
 const User = require('../models/user');
 const passport = require('passport');
 const authenticate = require('../authenticate');
+const cors = require('./cors')
+
 
 const userRouter = express.Router();
 
@@ -17,7 +19,7 @@ userRouter.get('/auth/google/callback',
         res.json({ success: true, token: token, status: 'You are successfully logged in!' });
     });
 
-userRouter.post('/signup', (req, res) => {
+userRouter.post('/signup', cors.corsWithOptions, (req, res) => {
     User.register(
         new User({ username: req.body.username }),
         req.body.password,
@@ -44,7 +46,7 @@ userRouter.post('/signup', (req, res) => {
     );
 });
 
-userRouter.post('/login', passport.authenticate('local', { session: false }), (req, res) => { //using local strategy to authenticate user
+userRouter.post('/login', cors.cors, passport.authenticate('local', { session: false }), (req, res) => { //using local strategy to authenticate user
     //response if login is successfull - passport handles errors
     //issue token to user
     const token = authenticate.getToken({ _id: req.user._id });

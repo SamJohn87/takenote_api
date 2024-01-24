@@ -1,11 +1,15 @@
 const express = require('express');
 const User = require('../models/user');
+const cors = require('./cors');
 const authenticate = require('../authenticate');
 
 const noteRouter = express.Router();
 
 noteRouter.route('/')
-    .get(authenticate.verifyUser, (req, res, next) => { //get all user's notes - user needs to be authenticated
+    .options(cors.corsWithOptions, (req, res) => {
+        res.sendStatus(200);
+    })
+    .get(cors.cors, authenticate.verifyUser, (req, res, next) => {
         User.findById(req.user._id)
             .then(user => {
                 res.statusCode = 200;
@@ -14,7 +18,7 @@ noteRouter.route('/')
             })
             .catch(err => next(err));
     })
-    .post(authenticate.verifyUser, (req, res, next) => { //add note - user needs to be authenticated
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //add note - user needs to be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user) {
@@ -34,11 +38,11 @@ noteRouter.route('/')
             })
             .catch(err => next(err));
     })
-    .put(authenticate.verifyUser, (req, res) => {
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end('PUT operation not supported on /notes');
     })
-    .delete(authenticate.verifyUser, (req, res, next) => { //delete all notes - user must be authenticated
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //delete all notes - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user) {
@@ -60,7 +64,7 @@ noteRouter.route('/')
     });
 
 noteRouter.route('/:noteId')
-    .get(authenticate.verifyUser, (req, res, next) => { //get specific note - user must be authenticated
+    .get(cors.cors, authenticate.verifyUser, (req, res, next) => { //get specific note - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.notes.id(req.params.noteId)) {
@@ -79,11 +83,11 @@ noteRouter.route('/:noteId')
             })
             .catch(err => next(err));
     })
-    .post(authenticate.verifyUser, (req, res) => {
+    .post(cors.corsWithOptions, authenticate.verifyUser, (req, res) => {
         res.statusCode = 403;
         res.end(`POST operation not supported on /notes/${req.params.noteId}`);
     })
-    .put(authenticate.verifyUser, (req, res, next) => { //update note - user must be authenticated
+    .put(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //update note - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.notes.id(req.params.noteId)) {
@@ -109,7 +113,7 @@ noteRouter.route('/:noteId')
             })
             .catch(err => next(err));
     })
-    .delete(authenticate.verifyUser, (req, res, next) => { //delete note - user must be authenticated
+    .delete(cors.corsWithOptions, authenticate.verifyUser, (req, res, next) => { //delete note - user must be authenticated
         User.findById(req.user._id)
             .then(user => {
                 if (user && user.notes.id(req.params.noteId)) {
